@@ -49,6 +49,8 @@ end
 
 
 %% Define the hemodynamic model
+
+
 dVpudt = heaviside(Qpul) * Qpul - Qmt; % eqn 26
 dQmtdt = ((1/Lmt)*((Ppu-Plv)-Qmt*Rmt)) + Qmt*A/dAdt; % eqn 27
 dVlvdt = Qmt - heaviside(Qav) * Qav; % eqn 28
@@ -103,4 +105,6 @@ end
 % w = eigen frequency
 % D = damping factor
 % dc = defect of closure
+% V0 = volume at zero pressure
+% Vd = unstressed volume chamber
 
