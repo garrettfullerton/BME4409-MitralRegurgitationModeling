@@ -4,7 +4,7 @@
 - [] identify parameters for physical model
 - [] identify parameters that change for mitral regurgitation
 - [] write equations for mitral opening and closing
-- [] implement differential equations given by Paeme et al.
+- [x] implement differential equations given by Paeme et al.
 - [] identify metrics on cardiac health and function
 - [] analyze how metrics change under normal cardiac function and mitral regurgitation
 - [] analyze how performance changes under different initial conditions
