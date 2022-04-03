@@ -10,6 +10,8 @@
 %% Initialize parameters
 clc; clear; close all;
 healthy = 1; % healthy = 0 indicates mitral insufficiency
+t_max = 20; % seconds
+t_step = 0.01; 
 
 % Table 1 values
 % TODO: look at table 6 values instead ?
@@ -49,30 +51,84 @@ end
 
 
 %% Define the hemodynamic model
+% This model had too many parameters for us to properly manage using
+% MATLAB's differential equation solvers so we instead just solved for the
+% values at each time point.
 
+% The following initial conditions need to be figured out...
+% Then I think this will work?
+% Qpul = 0.001;
+% Qmt = 0.001;
+% Vpu = pcd.V0;
+% Vlv = lvf.V0;
+% Ppu = pcd.P0;
+% A = Amax;
+% dAdt = 0.001;
+% Qav = 0.001;
+% Pao = spt.P0;
+% Qsys = 0.001;
+% Vao = spt.V0;
+% Qtc = 0.001;
+% Vvc = 0.001;
+% Vrv = rvf.V0;
+% Pvc = 0.001;
+% Qpv = 0.001;
+% Ppa = 0.001;
+% Vpa = 0.001;
+% figure; hold on;
 
+for t = 1:t_step:t_max
 dVpudt = heaviside(Qpul) * Qpul - Qmt; % eqn 26
-dQmtdt = ((1/Lmt)*((Ppu-Plv)-Qmt*Rmt)) + Qmt*A/dAdt; % eqn 27
+Vpu = Vpu + dVpudt * t_step;
+
+[~, ~, ~, Plv] = driver(t, lvf.Ees, Vlv, lvf.Vd, lvf.V0, lvf.P0, lvf.lambda, HR);
+dQmtdt = ((1/mt.L)*((Ppu-Plv)-Qmt*mt.R)) + Qmt*A/dAdt; % eqn 27
+Qmt = Qmt + dQmtdt * t_step;
+
 dVlvdt = Qmt - heaviside(Qav) * Qav; % eqn 28
-dQavdt = heaviside(heaviside(Plv-Pao)+heaviside(Qav)-0.5) * ((1/Lav)*((Plv-Pao)-Qav*Rav)); %eqn 29
+Vlv = Vlv + dVlvdt * t_step;
+
+dQavdt = heaviside(heaviside(Plv-Pao)+heaviside(Qav)-0.5) * ((1/av.L)*((Plv-Pao)-Qav*av.R)); %eqn 29
+Qav = Qav + dQavdt * t_step;
+
 dVaodt = heaviside(Qav) * Qav - heaviside(Qsys) * Qsys; % eqn 30
+Vao = Vao + dVaodt * t_step;
+
 dVvcdt = heaviside(Qsys) * Qsys - heaviside(Qtc) * Qtc; % eqn 31
-dQtcdt = heaviside(heaviside(Pvc-Prv)+heaviside(Qtc)-0.5) * ((1/Ltc)*((Pvc-Prv)-Qtc*Rtc)); % eqn 32
+Vvc = Vvc + dVvcdt * t_step;
+
+[~, ~, ~, Prv] = driver(t, rvf.Ees, Vrv, rvf.Vd, rvf.V0, rvf.P0, rvf.lambda, HR);
+dQtcdt = heaviside(heaviside(Pvc-Prv)+heaviside(Qtc)-0.5) * ((1/tc.L)*((Pvc-Prv)-Qtc*tc.R)); % eqn 32
+Qtc = Qtc + dQtcdt * t_step;
+
 dVrvdt = heaviside(Qtc) * Qtc - heaviside(Qpv) * Qpv; % eqn 33
-dQpvdt = heaviside(heaviside(Prv-Ppa)+heaviside(Qpv)-0.5) * ((1/Lpv)*((Prv-Ppa)-Qpv*Rpv)); % eqn 34
+Vrv = Vrv + dVrvdt * t_step;
+
+dQpvdt = heaviside(heaviside(Prv-Ppa)+heaviside(Qpv)-0.5) * ((1/pv.L)*((Prv-Ppa)-Qpv*pv.R)); % eqn 34
+Qpv = Qpv + dQpvdt * t_step;
+
 dVpadt = heaviside(Qpv) * Qpv - heaviside(Qpul) * Qpul; % eqn 35
+Vpa = Vpa + dVpadt * t_step;
 
 switch healthy
     case 1
         % Healthy mitral valve area
         dAdt = heaviside(heaviside(Ppu-Plv) + heaviside(A) - 0.5) * dAdt; % eqn 36
-        ddAdt = heaviside(heaviside(Ppu-Plv) + heaviside(A) - 0.5) * ((Amax-A)*power(w,2)*Ks*(Ppu-Plv) - 2*d*dAdt*w - A*power(w,2)); % eqn 37
+        A = A + dAdt * t_step;
+        
+        ddAdt = heaviside(heaviside(Ppu-Plv) + heaviside(A) - 0.5) * ((Amax-A)*power(w,2)*Ks*(Ppu-Plv) - 2*D*dAdt*w - A*power(w,2)); % eqn 37
+        dAdt = dAdt + ddAdt * t_step;
     case 0
         % Mitral insufficiency
         dAdt = heaviside(heaviside(Ppu-Plv) + heaviside(A-dc) - 0.5) * dAdt; % eqn 38
-        ddAdt = heaviside(heaviside(Ppu-Plv) + heaviside(A-dc) - 0.5) * ((Amax-A)*power(w,2)*Ks*(Ppu-Plv) - 2*d*dAdt*w - A*power(w,2)); % eqn 39
+        A = A + dAdt * t_step;
+        
+        ddAdt = heaviside(heaviside(Ppu-Plv) + heaviside(A-dc) - 0.5) * ((Amax-A)*power(w,2)*Ks*(Ppu-Plv) - 2*D*dAdt*w - A*power(w,2)); % eqn 39
+        dAdt = dAdt + ddAdt * t_step;
 end
-
+if isnan(Plv), break; end
+scatter(Plv, Vlv)
+end
 
 
 
