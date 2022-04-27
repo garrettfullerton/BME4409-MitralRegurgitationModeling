@@ -1,16 +1,8 @@
 # BME4409-MitralRegurgitationModeling
-## To-Do List
-- [] write readme file
-- [] identify parameters for physical model
-- [] identify parameters that change for mitral regurgitation
-- [] write equations for mitral opening and closing
-- [x] implement differential equations given by Paeme et al.
-- [] identify metrics on cardiac health and function
-- [] analyze how metrics change under normal cardiac function and mitral regurgitation
-- [] analyze how performance changes under different initial conditions
-- [] summarize results in a presentable format for the report
+## By Garrett Fullerton, Andrea Lopez, Duc Tran
+## Modifications made from previous code provided by user S19 BENG 189: https://github.com/s19-beng-189/module-1-group-project-regurgitation
 
-## Deadlines
-- code deadline: april 7th
-- final project presentation: april 11th
-- final project report: april 27th
+## Mitral valve regurgitation or insufficiency is a condition in which the mitral valve does not shut tightly resulting in backflow into the left atrium
+## Here, we model the cardiovascular parameters of mitral flow, left ventricular pressure-volume loops, and systemic pulse pressure under increasing severity of mitral ## valve regurgitation.
+## The folder "cardiac-model-simpler" stores all the various codes used to model mitral valve regurgitation present in the final report and final presentation
+## Use of MATLAB is needed to run the .m files.
